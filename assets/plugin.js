@@ -11,6 +11,12 @@ require(['gitbook', 'jQuery'], function(gitbook, $) {
             .click(function() {
               copyCommand($(this));
             })
+    )
+    .append(
+    	$('<i class="fa fa-files-o t-copy"></i>')
+            .click(function() {
+              paramCopyCommand($(this));
+            })
     );
   }
 
@@ -18,6 +24,14 @@ require(['gitbook', 'jQuery'], function(gitbook, $) {
 
     /* Add also the text area that will allow to copy */
     $('body').append('<textarea id="code-textarea" />');
+  }
+
+  function escapeRegExp(str) {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+  }
+
+  function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
   }
 
   function copyCommand(button) {
@@ -29,6 +43,24 @@ require(['gitbook', 'jQuery'], function(gitbook, $) {
     document.execCommand('copy');
     pre.focus();
     updateCopyButton(button);
+  }
+
+  function paramCopyCommand(button) {
+    pre = button.parent();
+    textarea = $('#code-textarea');
+    var copyValue = pre.text().replace("{", "").replace("}", "");
+    copyValue = replaceAll(copyValue, '"', '');
+    var arr = copyValue.split(",");
+    copyValue = "";
+    for (var i = 0; i < arr.length; i++) {
+      copyValue += arr[i].trim() + "\n";
+    }
+    textarea.val(copyValue);
+    textarea.focus();
+    textarea.select();
+    document.execCommand('copy');
+    pre.focus();
+    updateParamCopyButton(button);
   }
 
   function initializePlugin(config) {
@@ -71,6 +103,19 @@ require(['gitbook', 'jQuery'], function(gitbook, $) {
     }
     timeouts[id] = window.setTimeout(function() {
       button.removeClass('fa-check').addClass('fa-clone');
+    }, 1000);
+  }
+
+  function updateParamCopyButton(button) {
+    id = button.attr('data-command');
+    button.removeClass('fa-files-o').addClass('fa-check');
+
+    // Clear timeout
+    if (id in timeouts) {
+      clearTimeout(timeouts[id]);
+    }
+    timeouts[id] = window.setTimeout(function() {
+      button.removeClass('fa-check').addClass('fa-files-o');
     }, 1000);
   }
 
