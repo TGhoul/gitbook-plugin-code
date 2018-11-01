@@ -9,6 +9,10 @@
   position: relative;
 }
 
+.code-wrapper i:nth-child(2) {
+  right: 3em
+}
+
 .code-wrapper i {
   color: #c1c7cd;
   cursor: pointer;
